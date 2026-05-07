@@ -1,8 +1,10 @@
 'use client'
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, lazy, Suspense } from 'react'
 import Link from 'next/link'
 import { useDropzone } from 'react-dropzone'
 import { formatBytes, formatDate } from '@/lib/utils'
+
+const ImageTransformer = lazy(() => import('@/components/ImageTransformer'))
 
 interface Asset {
   id: string
@@ -29,6 +31,7 @@ export default function LibraryPage() {
   const [copied, setCopied] = useState(false)
   const [filter, setFilter] = useState<'all' | 'images' | 'videos'>('all')
   const [noCloudinary, setNoCloudinary] = useState(false)
+  const [studioAsset, setStudioAsset] = useState<Asset | null>(null)
 
   const load = async () => {
     const res = await fetch('/api/library')
@@ -187,6 +190,17 @@ export default function LibraryPage() {
                     <img src={asset.url} alt={asset.filename} className="w-full h-full object-cover" />
                   )}
                   <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors" />
+                  {!isVideo(asset) && (
+                    <button
+                      onClick={(e) => { e.stopPropagation(); setStudioAsset(asset) }}
+                      className="absolute bottom-2 left-2 bg-violet-600 text-white rounded-lg px-2 py-1 text-xs font-medium opacity-0 group-hover:opacity-100 transition-opacity hover:bg-violet-700 flex items-center gap-1"
+                    >
+                      <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                      </svg>
+                      Edit
+                    </button>
+                  )}
                   <button
                     onClick={(e) => { e.stopPropagation(); handleDelete(asset) }}
                     disabled={deleting === asset.id}
@@ -206,6 +220,13 @@ export default function LibraryPage() {
           </div>
         )}
       </main>
+
+      {/* Image Studio */}
+      {studioAsset && (
+        <Suspense fallback={null}>
+          <ImageTransformer asset={studioAsset} onClose={() => setStudioAsset(null)} />
+        </Suspense>
+      )}
 
       {/* Detail panel */}
       {selected && (
@@ -231,6 +252,17 @@ export default function LibraryPage() {
               <p className="text-xs text-gray-400 truncate mt-1 font-mono">{selected.url}</p>
             </div>
             <div className="flex items-center gap-2 flex-shrink-0">
+              {!isVideo(selected) && (
+                <button
+                  onClick={() => setStudioAsset(selected)}
+                  className="flex items-center gap-2 bg-violet-600 text-white px-4 py-2 rounded-xl text-sm font-medium hover:bg-violet-700 transition-colors"
+                >
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                  </svg>
+                  Image Studio
+                </button>
+              )}
               <button
                 onClick={() => copyUrl(selected.url)}
                 className="flex items-center gap-2 bg-gray-900 text-white px-4 py-2 rounded-xl text-sm font-medium hover:bg-gray-800 transition-colors"
@@ -238,7 +270,7 @@ export default function LibraryPage() {
                 {copied ? (
                   <><svg className="w-4 h-4 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg> Copied!</>
                 ) : (
-                  <><svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg> Copy URL</>
+                  <><svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg> Copy URL</>
                 )}
               </button>
               <a href={selected.url} target="_blank" rel="noopener noreferrer" className="border border-gray-200 text-gray-600 px-4 py-2 rounded-xl text-sm font-medium hover:bg-gray-50 transition-colors">
