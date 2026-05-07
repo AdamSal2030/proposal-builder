@@ -29,58 +29,88 @@ export function createDefaultSection(type: SectionType): Section {
   const defaults: Record<SectionType, Section['data']> = {
     hero: {
       title: 'Welcome to Our Proposal',
-      subtitle: "We're excited to present this proposal to you.",
-      buttonText: 'Get Started',
+      subtitle: 'We are excited to present this opportunity to you.',
+      buttonText: 'View Details',
+    },
+    cover: {
+      title: 'Proposal Title',
+      subtitle: 'A tailored proposal prepared exclusively for you',
+      preparedFor: 'Client Name',
+      preparedBy: 'Your Company',
+      date: new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' }),
     },
     summary: {
       title: 'Executive Summary',
       content: 'Provide a concise overview of your proposal here.',
     },
-    problem: {
-      title: 'The Problem',
-      content: 'Describe the challenge or pain point your client is facing.',
+    about: {
+      title: 'About Us',
+      content: 'Tell your client who you are and why you are the right choice.',
     },
-    solution: {
-      title: 'Our Solution',
-      content: 'Explain how your product or service solves the problem.',
-    },
-    features: {
-      title: 'Key Features',
+    scope: {
+      title: 'Scope of Work',
+      intro: 'The following outlines exactly what is included in this proposal.',
       items: [
-        { title: 'Feature 1', description: 'Description of this feature.' },
-        { title: 'Feature 2', description: 'Description of this feature.' },
-        { title: 'Feature 3', description: 'Description of this feature.' },
+        { text: 'Item included in this proposal', included: true },
+        { text: 'Another deliverable included', included: true },
+        { text: 'Item not included in this scope', included: false },
       ],
+    },
+    specs: {
+      title: 'Specifications',
+      subtitle: 'Detailed specifications for this proposal',
+      items: [
+        { label: 'Category', value: 'Value' },
+        { label: 'Specification', value: 'Details here' },
+        { label: 'Another Spec', value: 'Details here' },
+      ],
+    },
+    gallery: {
+      title: 'Gallery',
+      subtitle: 'A visual overview',
+      images: [],
+      columns: 3,
+    },
+    investment: {
+      title: 'Investment',
+      intro: 'Below is a detailed breakdown of the investment required.',
+      items: [
+        { description: 'Item / Service', amount: '$0' },
+        { description: 'Item / Service', amount: '$0' },
+      ],
+      total: '$0',
+      currency: 'USD',
+      notes: 'Prices are valid for 30 days from the date of this proposal.',
+      validity: '30 days',
     },
     timeline: {
       title: 'Project Timeline',
       items: [
-        { phase: 'Phase 1', duration: '2 weeks', description: 'Discovery and planning.' },
-        { phase: 'Phase 2', duration: '4 weeks', description: 'Development and implementation.' },
-        { phase: 'Phase 3', duration: '1 week', description: 'Testing and launch.' },
+        { phase: 'Phase 1', duration: '1 week', description: 'Initial consultation and planning.' },
+        { phase: 'Phase 2', duration: '2 weeks', description: 'Execution and delivery.' },
+        { phase: 'Phase 3', duration: '1 week', description: 'Review, handover and sign-off.' },
       ],
     },
-    pricing: {
-      title: 'Pricing',
-      tiers: [
-        { name: 'Starter', price: '$999', period: '/month', features: ['Feature A', 'Feature B'], highlighted: false },
+    testimonials: {
+      title: 'What Our Clients Say',
+      items: [
         {
-          name: 'Professional',
-          price: '$2,499',
-          period: '/month',
-          features: ['Everything in Starter', 'Feature C', 'Feature D'],
-          highlighted: true,
+          quote: 'Working with this team was an absolute pleasure. The results exceeded our expectations.',
+          author: 'Client Name',
+          role: 'CEO',
+          company: 'Company Name',
         },
       ],
     },
-    team: {
-      title: 'Our Team',
-      members: [{ name: 'Jane Doe', role: 'Project Lead', bio: 'Expert with 10+ years of experience.' }],
+    terms: {
+      title: 'Terms & Conditions',
+      content: 'By accepting this proposal, the client agrees to the terms outlined herein. Payment is due within 14 days of invoice. All work remains the property of the service provider until full payment is received.',
+      showSignature: true,
     },
     cta: {
-      title: 'Ready to Get Started?',
-      subtitle: "Let's work together to achieve your goals.",
-      buttonText: 'Contact Us',
+      title: 'Ready to Move Forward?',
+      subtitle: 'Get in touch and we will get started right away.',
+      buttonText: 'Accept Proposal',
     },
   }
 
@@ -101,12 +131,15 @@ export function formatDate(date: Date | string): string {
 
 export const SECTION_LABELS: Record<SectionType, string> = {
   hero: 'Hero Banner',
+  cover: 'Cover Page',
   summary: 'Executive Summary',
-  problem: 'Problem Statement',
-  solution: 'Our Solution',
-  features: 'Key Features',
-  timeline: 'Project Timeline',
-  pricing: 'Pricing',
-  team: 'Our Team',
+  about: 'About Us',
+  scope: 'Scope of Work',
+  specs: 'Specifications',
+  gallery: 'Photo Gallery',
+  investment: 'Investment',
+  timeline: 'Timeline',
+  testimonials: 'Testimonials',
+  terms: 'Terms & Conditions',
   cta: 'Call to Action',
 }

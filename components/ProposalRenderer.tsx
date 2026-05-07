@@ -1,22 +1,20 @@
 'use client'
-import type { Section, HeroData, TextBlockData, FeaturesData, TimelineData, PricingData, TeamData, CTAData } from '@/lib/types'
+import type { Section, HeroData, CoverData, TextBlockData, ScopeData, SpecsData, GalleryData, InvestmentData, TimelineData, TestimonialsData, TermsData, CTAData } from '@/lib/types'
 import HeroSection from './sections/HeroSection'
+import CoverSection from './sections/CoverSection'
 import TextBlockSection from './sections/TextBlockSection'
-import FeaturesSection from './sections/FeaturesSection'
+import ScopeSection from './sections/ScopeSection'
+import SpecsSection from './sections/SpecsSection'
+import GallerySection from './sections/GallerySection'
+import InvestmentSection from './sections/InvestmentSection'
 import TimelineSection from './sections/TimelineSection'
-import PricingSection from './sections/PricingSection'
-import TeamSection from './sections/TeamSection'
+import TestimonialsSection from './sections/TestimonialsSection'
+import TermsSection from './sections/TermsSection'
 import CTASection from './sections/CTASection'
 
 interface Props {
   sections: Section[]
   theme: string
-}
-
-const textVariantMap: Record<string, 'light' | 'gray'> = {
-  summary: 'light',
-  problem: 'gray',
-  solution: 'light',
 }
 
 export default function ProposalRenderer({ sections, theme }: Props) {
@@ -37,18 +35,25 @@ export default function ProposalRenderer({ sections, theme }: Props) {
         switch (section.type) {
           case 'hero':
             return <HeroSection key={section.id} data={section.data as HeroData} theme={theme} />
+          case 'cover':
+            return <CoverSection key={section.id} data={section.data as CoverData} theme={theme} />
           case 'summary':
-          case 'problem':
-          case 'solution':
-            return <TextBlockSection key={section.id} data={section.data as TextBlockData} variant={textVariantMap[section.type]} />
-          case 'features':
-            return <FeaturesSection key={section.id} data={section.data as FeaturesData} theme={theme} />
+          case 'about':
+            return <TextBlockSection key={section.id} data={section.data as TextBlockData} variant={section.type === 'about' ? 'gray' : 'light'} />
+          case 'scope':
+            return <ScopeSection key={section.id} data={section.data as ScopeData} theme={theme} />
+          case 'specs':
+            return <SpecsSection key={section.id} data={section.data as SpecsData} theme={theme} />
+          case 'gallery':
+            return <GallerySection key={section.id} data={section.data as GalleryData} theme={theme} />
+          case 'investment':
+            return <InvestmentSection key={section.id} data={section.data as InvestmentData} theme={theme} />
           case 'timeline':
             return <TimelineSection key={section.id} data={section.data as TimelineData} theme={theme} />
-          case 'pricing':
-            return <PricingSection key={section.id} data={section.data as PricingData} theme={theme} />
-          case 'team':
-            return <TeamSection key={section.id} data={section.data as TeamData} />
+          case 'testimonials':
+            return <TestimonialsSection key={section.id} data={section.data as TestimonialsData} theme={theme} />
+          case 'terms':
+            return <TermsSection key={section.id} data={section.data as TermsData} theme={theme} />
           case 'cta':
             return <CTASection key={section.id} data={section.data as CTAData} theme={theme} />
           default:

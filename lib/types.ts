@@ -1,16 +1,20 @@
 export type SectionType =
   | 'hero'
+  | 'cover'
   | 'summary'
-  | 'problem'
-  | 'solution'
-  | 'features'
+  | 'about'
+  | 'scope'
+  | 'specs'
+  | 'gallery'
+  | 'investment'
   | 'timeline'
-  | 'pricing'
-  | 'team'
+  | 'testimonials'
+  | 'terms'
   | 'cta'
 
 export type BackgroundType = 'gradient' | 'image' | 'video'
 
+// ── Hero (full-bleed banner with optional video/image bg) ─────────────────
 export interface HeroData {
   title: string
   subtitle: string
@@ -21,59 +25,105 @@ export interface HeroData {
   overlayOpacity?: number
 }
 
+// ── Cover (proposal title page) ───────────────────────────────────────────
+export interface CoverData {
+  title: string
+  subtitle?: string
+  preparedFor: string
+  preparedBy: string
+  date: string
+  logo?: string
+  backgroundImage?: string
+}
+
+// ── Text block (summary, about) ───────────────────────────────────────────
 export interface TextBlockData {
   title: string
   content: string
 }
 
-export interface FeatureItem {
+// ── Scope of work ─────────────────────────────────────────────────────────
+export interface ScopeItem {
+  text: string
+  included: boolean
+}
+export interface ScopeData {
   title: string
-  description: string
-  icon?: string
+  intro?: string
+  items: ScopeItem[]
+}
+
+// ── Specifications / key-value table ──────────────────────────────────────
+export interface SpecItem {
+  label: string
+  value: string
+}
+export interface SpecsData {
+  title: string
+  subtitle?: string
+  items: SpecItem[]
   image?: string
 }
 
-export interface FeaturesData {
+// ── Photo gallery ─────────────────────────────────────────────────────────
+export interface GalleryImage {
+  url: string
+  caption?: string
+}
+export interface GalleryData {
   title: string
-  items: FeatureItem[]
+  subtitle?: string
+  images: GalleryImage[]
+  columns?: number
 }
 
+// ── Investment / cost breakdown ───────────────────────────────────────────
+export interface InvestmentItem {
+  description: string
+  amount: string
+}
+export interface InvestmentData {
+  title: string
+  intro?: string
+  items: InvestmentItem[]
+  total: string
+  currency?: string
+  notes?: string
+  validity?: string
+}
+
+// ── Timeline ──────────────────────────────────────────────────────────────
 export interface TimelineItem {
   phase: string
   duration: string
   description: string
 }
-
 export interface TimelineData {
   title: string
   items: TimelineItem[]
 }
 
-export interface PricingTier {
-  name: string
-  price: string
-  period?: string
-  features: string[]
-  highlighted?: boolean
-}
-
-export interface PricingData {
-  title: string
-  tiers: PricingTier[]
-}
-
-export interface TeamMember {
-  name: string
-  role: string
-  bio: string
+// ── Testimonials ──────────────────────────────────────────────────────────
+export interface TestimonialItem {
+  quote: string
+  author: string
+  role?: string
+  company?: string
   avatar?: string
 }
-
-export interface TeamData {
+export interface TestimonialsData {
   title: string
-  members: TeamMember[]
+  items: TestimonialItem[]
 }
 
+// ── Terms & conditions ────────────────────────────────────────────────────
+export interface TermsData {
+  title: string
+  content: string
+  showSignature?: boolean
+}
+
+// ── Call to action ────────────────────────────────────────────────────────
 export interface CTAData {
   title: string
   subtitle: string
@@ -82,11 +132,15 @@ export interface CTAData {
 
 export type SectionData =
   | HeroData
+  | CoverData
   | TextBlockData
-  | FeaturesData
+  | ScopeData
+  | SpecsData
+  | GalleryData
+  | InvestmentData
   | TimelineData
-  | PricingData
-  | TeamData
+  | TestimonialsData
+  | TermsData
   | CTAData
 
 export interface Section {
