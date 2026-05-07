@@ -60,6 +60,13 @@ export default function Dashboard() {
           </div>
           <span className="font-semibold text-gray-900 text-lg">ProposalCraft</span>
         </div>
+        <div className="flex items-center gap-3">
+          <Link href="/library" className="flex items-center gap-1.5 text-sm text-gray-600 font-medium hover:text-violet-600 transition-colors px-3 py-2 rounded-lg hover:bg-violet-50">
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+            </svg>
+            Library
+          </Link>
         <Link
           href="/proposals/new"
           className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors flex items-center gap-2"
@@ -69,6 +76,7 @@ export default function Dashboard() {
           </svg>
           New Proposal
         </Link>
+        </div>
       </nav>
 
       <main className="max-w-6xl mx-auto px-6 py-10">

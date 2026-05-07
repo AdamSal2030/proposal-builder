@@ -37,6 +37,25 @@ export default function NewProposalPage() {
 
   const removeFile = (i: number) => setFiles((prev) => prev.filter((_, idx) => idx !== i))
 
+  const handleScratch = async () => {
+    if (!title.trim()) { setError('Please enter a proposal title.'); return }
+    setError('')
+    setStep('generating')
+    try {
+      const res = await fetch('/api/proposals', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title: title.trim(), clientName: clientName.trim(), clientEmail: clientEmail.trim() }),
+      })
+      if (!res.ok) throw new Error('Failed to create proposal')
+      const proposal = await res.json()
+      router.push(`/proposals/${proposal.id}`)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Something went wrong.')
+      setStep('info')
+    }
+  }
+
   const handleSubmit = async () => {
     if (!title.trim()) { setError('Please enter a proposal title.'); return }
     if (!description.trim() && files.length === 0) { setError('Please add a description or upload at least one file.'); return }
@@ -231,15 +250,26 @@ export default function NewProposalPage() {
             </div>
           )}
 
-          <button
-            onClick={handleSubmit}
-            className="w-full bg-blue-600 text-white py-3 rounded-xl font-medium hover:bg-blue-700 transition-colors flex items-center justify-center gap-2"
-          >
-            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-            </svg>
-            Generate Proposal with AI
-          </button>
+          <div className="grid grid-cols-2 gap-3">
+            <button
+              onClick={handleScratch}
+              className="w-full border-2 border-gray-200 text-gray-700 py-3 rounded-xl font-medium hover:border-gray-300 hover:bg-gray-50 transition-colors flex items-center justify-center gap-2"
+            >
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+              </svg>
+              Build Manually
+            </button>
+            <button
+              onClick={handleSubmit}
+              className="w-full bg-blue-600 text-white py-3 rounded-xl font-medium hover:bg-blue-700 transition-colors flex items-center justify-center gap-2"
+            >
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+              </svg>
+              Generate with AI
+            </button>
+          </div>
         </div>
       </main>
     </div>
