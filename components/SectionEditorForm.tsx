@@ -1,6 +1,15 @@
 'use client'
 import { useState } from 'react'
-import type { Section, SectionType, HeroData, TextBlockData, FeaturesData, FeatureItem, TimelineData, TimelineItem, PricingData, PricingTier, TeamData, TeamMember, CTAData } from '@/lib/types'
+import dynamic from 'next/dynamic'
+import type {
+  Section, SectionType, HeroData, TextBlockData,
+  FeaturesData, FeatureItem, TimelineData, TimelineItem,
+  PricingData, PricingTier, TeamData, TeamMember, CTAData,
+  BackgroundType,
+} from '@/lib/types'
+import ImageUploader from './ImageUploader'
+
+const RichTextEditor = dynamic(() => import('./RichTextEditor'), { ssr: false })
 
 interface Props {
   section: Section
@@ -8,44 +17,120 @@ interface Props {
   proposalId: string
 }
 
-function Field({ label, value, onChange, textarea = false, placeholder = '' }: {
-  label: string
-  value: string
-  onChange: (v: string) => void
-  textarea?: boolean
-  placeholder?: string
+function Field({ label, value, onChange, type = 'text', placeholder = '' }: {
+  label: string; value: string; onChange: (v: string) => void; type?: string; placeholder?: string
 }) {
-  const cls = 'w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent'
   return (
     <div>
       <label className="block text-xs font-medium text-gray-500 mb-1 uppercase tracking-wide">{label}</label>
-      {textarea
-        ? <textarea className={`${cls} min-h-[100px] resize-y`} value={value} onChange={(e) => onChange(e.target.value)} placeholder={placeholder} />
-        : <input className={cls} value={value} onChange={(e) => onChange(e.target.value)} placeholder={placeholder} />
-      }
+      <input
+        type={type}
+        className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        placeholder={placeholder}
+      />
     </div>
   )
 }
 
+function RichField({ label, value, onChange }: { label: string; value: string; onChange: (v: string) => void }) {
+  return (
+    <div>
+      <label className="block text-xs font-medium text-gray-500 mb-1.5 uppercase tracking-wide">{label}</label>
+      <RichTextEditor value={value} onChange={onChange} />
+    </div>
+  )
+}
+
+// ──────────────── Hero ────────────────
 function HeroEditor({ data, onChange }: { data: HeroData; onChange: (d: HeroData) => void }) {
+  const bgType = data.backgroundType ?? 'gradient'
+
   return (
     <div className="space-y-4">
       <Field label="Title" value={data.title} onChange={(v) => onChange({ ...data, title: v })} />
-      <Field label="Subtitle" value={data.subtitle} onChange={(v) => onChange({ ...data, subtitle: v })} textarea />
+      <Field label="Subtitle" value={data.subtitle} onChange={(v) => onChange({ ...data, subtitle: v })} />
       <Field label="Button Text" value={data.buttonText} onChange={(v) => onChange({ ...data, buttonText: v })} />
+
+      <div className="border-t border-gray-100 pt-4">
+        <label className="block text-xs font-medium text-gray-500 mb-2 uppercase tracking-wide">Background Type</label>
+        <div className="flex gap-2">
+          {(['gradient', 'image', 'video'] as BackgroundType[]).map((t) => (
+            <button
+              key={t}
+              onClick={() => onChange({ ...data, backgroundType: t })}
+              className={`flex-1 py-1.5 rounded-lg text-xs font-medium capitalize transition-colors ${bgType === t ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
+            >
+              {t}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {bgType === 'image' && (
+        <div>
+          <label className="block text-xs font-medium text-gray-500 mb-1.5 uppercase tracking-wide">Background Image</label>
+          <ImageUploader
+            value={data.backgroundImage}
+            onChange={(url) => onChange({ ...data, backgroundImage: url })}
+            label="Upload Hero Image"
+          />
+        </div>
+      )}
+
+      {bgType === 'video' && (
+        <div className="space-y-3">
+          <div>
+            <label className="block text-xs font-medium text-gray-500 mb-1.5 uppercase tracking-wide">Video URL (YouTube or Vimeo)</label>
+            <input
+              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="https://www.youtube.com/watch?v=..."
+              value={data.backgroundVideo ?? ''}
+              onChange={(e) => onChange({ ...data, backgroundVideo: e.target.value })}
+            />
+          </div>
+          <p className="text-xs text-gray-400 text-center">— or upload a video file —</p>
+          <ImageUploader
+            value={data.backgroundVideo?.startsWith('/') ? data.backgroundVideo : undefined}
+            onChange={(url) => onChange({ ...data, backgroundVideo: url })}
+            accept="image+video"
+            label="Upload MP4/WebM Video"
+          />
+        </div>
+      )}
+
+      {bgType !== 'gradient' && (
+        <div>
+          <label className="block text-xs font-medium text-gray-500 mb-1 uppercase tracking-wide">
+            Overlay Opacity — {data.overlayOpacity ?? 50}%
+          </label>
+          <input
+            type="range"
+            min={0}
+            max={90}
+            step={5}
+            value={data.overlayOpacity ?? 50}
+            onChange={(e) => onChange({ ...data, overlayOpacity: Number(e.target.value) })}
+            className="w-full accent-blue-600"
+          />
+        </div>
+      )}
     </div>
   )
 }
 
+// ──────────────── Text block ────────────────
 function TextBlockEditor({ data, onChange }: { data: TextBlockData; onChange: (d: TextBlockData) => void }) {
   return (
     <div className="space-y-4">
       <Field label="Title" value={data.title} onChange={(v) => onChange({ ...data, title: v })} />
-      <Field label="Content" value={data.content} onChange={(v) => onChange({ ...data, content: v })} textarea placeholder="Write your content here..." />
+      <RichField label="Content" value={data.content} onChange={(v) => onChange({ ...data, content: v })} />
     </div>
   )
 }
 
+// ──────────────── Features ────────────────
 function FeaturesEditor({ data, onChange }: { data: FeaturesData; onChange: (d: FeaturesData) => void }) {
   const updateItem = (i: number, patch: Partial<FeatureItem>) => {
     const items = data.items.map((item, idx) => idx === i ? { ...item, ...patch } : item)
@@ -57,7 +142,7 @@ function FeaturesEditor({ data, onChange }: { data: FeaturesData; onChange: (d: 
   return (
     <div className="space-y-4">
       <Field label="Section Title" value={data.title} onChange={(v) => onChange({ ...data, title: v })} />
-      <div className="space-y-3">
+      <div className="space-y-4">
         {data.items.map((item, i) => (
           <div key={i} className="border border-gray-100 rounded-xl p-4 bg-gray-50 space-y-3">
             <div className="flex justify-between items-center">
@@ -65,7 +150,15 @@ function FeaturesEditor({ data, onChange }: { data: FeaturesData; onChange: (d: 
               <button onClick={() => removeItem(i)} className="text-red-400 hover:text-red-600 text-xs">Remove</button>
             </div>
             <Field label="Title" value={item.title} onChange={(v) => updateItem(i, { title: v })} />
-            <Field label="Description" value={item.description} onChange={(v) => updateItem(i, { description: v })} textarea />
+            <RichField label="Description" value={item.description} onChange={(v) => updateItem(i, { description: v })} />
+            <div>
+              <label className="block text-xs font-medium text-gray-500 mb-1.5 uppercase tracking-wide">Feature Image (optional)</label>
+              <ImageUploader
+                value={item.image}
+                onChange={(url) => updateItem(i, { image: url })}
+                label="Upload feature image"
+              />
+            </div>
           </div>
         ))}
       </div>
@@ -76,6 +169,7 @@ function FeaturesEditor({ data, onChange }: { data: FeaturesData; onChange: (d: 
   )
 }
 
+// ──────────────── Timeline ────────────────
 function TimelineEditor({ data, onChange }: { data: TimelineData; onChange: (d: TimelineData) => void }) {
   const updateItem = (i: number, patch: Partial<TimelineItem>) => {
     const items = data.items.map((item, idx) => idx === i ? { ...item, ...patch } : item)
@@ -95,9 +189,9 @@ function TimelineEditor({ data, onChange }: { data: TimelineData; onChange: (d: 
           </div>
           <div className="grid grid-cols-2 gap-3">
             <Field label="Phase Name" value={item.phase} onChange={(v) => updateItem(i, { phase: v })} />
-            <Field label="Duration" value={item.duration} onChange={(v) => updateItem(i, { duration: v })} placeholder="e.g. 2 weeks" />
+            <Field label="Duration" value={item.duration} onChange={(v) => updateItem(i, { duration: v })} placeholder="2 weeks" />
           </div>
-          <Field label="Description" value={item.description} onChange={(v) => updateItem(i, { description: v })} textarea />
+          <Field label="Description" value={item.description} onChange={(v) => updateItem(i, { description: v })} />
         </div>
       ))}
       <button onClick={addItem} className="w-full py-2 border-2 border-dashed border-gray-200 rounded-lg text-sm text-gray-500 hover:border-blue-300 hover:text-blue-500 transition-colors">
@@ -107,14 +201,13 @@ function TimelineEditor({ data, onChange }: { data: TimelineData; onChange: (d: 
   )
 }
 
+// ──────────────── Pricing ────────────────
 function PricingEditor({ data, onChange }: { data: PricingData; onChange: (d: PricingData) => void }) {
   const updateTier = (i: number, patch: Partial<PricingTier>) => {
     const tiers = data.tiers.map((t, idx) => idx === i ? { ...t, ...patch } : t)
     onChange({ ...data, tiers })
   }
-  const updateFeatures = (i: number, raw: string) => {
-    updateTier(i, { features: raw.split('\n').filter(Boolean) })
-  }
+  const updateFeatures = (i: number, raw: string) => updateTier(i, { features: raw.split('\n').filter(Boolean) })
   const addTier = () => onChange({ ...data, tiers: [...data.tiers, { name: 'New Tier', price: '$0', period: '/month', features: ['Feature A'] }] })
   const removeTier = (i: number) => onChange({ ...data, tiers: data.tiers.filter((_, idx) => idx !== i) })
 
@@ -144,7 +237,7 @@ function PricingEditor({ data, onChange }: { data: PricingData; onChange: (d: Pr
               className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 min-h-[80px] resize-y"
               value={tier.features.join('\n')}
               onChange={(e) => updateFeatures(i, e.target.value)}
-              placeholder="Feature A&#10;Feature B&#10;Feature C"
+              placeholder={'Feature A\nFeature B\nFeature C'}
             />
           </div>
         </div>
@@ -156,6 +249,7 @@ function PricingEditor({ data, onChange }: { data: PricingData; onChange: (d: Pr
   )
 }
 
+// ──────────────── Team ────────────────
 function TeamEditor({ data, onChange }: { data: TeamData; onChange: (d: TeamData) => void }) {
   const updateMember = (i: number, patch: Partial<TeamMember>) => {
     const members = data.members.map((m, idx) => idx === i ? { ...m, ...patch } : m)
@@ -173,11 +267,19 @@ function TeamEditor({ data, onChange }: { data: TeamData; onChange: (d: TeamData
             <span className="text-xs font-medium text-gray-500">Member {i + 1}</span>
             <button onClick={() => removeMember(i)} className="text-red-400 hover:text-red-600 text-xs">Remove</button>
           </div>
+          <div>
+            <label className="block text-xs font-medium text-gray-500 mb-1.5 uppercase tracking-wide">Photo</label>
+            <ImageUploader
+              value={m.avatar}
+              onChange={(url) => updateMember(i, { avatar: url })}
+              label="Upload member photo"
+            />
+          </div>
           <div className="grid grid-cols-2 gap-3">
             <Field label="Name" value={m.name} onChange={(v) => updateMember(i, { name: v })} />
             <Field label="Role" value={m.role} onChange={(v) => updateMember(i, { role: v })} />
           </div>
-          <Field label="Bio" value={m.bio} onChange={(v) => updateMember(i, { bio: v })} textarea />
+          <RichField label="Bio" value={m.bio} onChange={(v) => updateMember(i, { bio: v })} />
         </div>
       ))}
       <button onClick={addMember} className="w-full py-2 border-2 border-dashed border-gray-200 rounded-lg text-sm text-gray-500 hover:border-blue-300 hover:text-blue-500 transition-colors">
@@ -187,16 +289,18 @@ function TeamEditor({ data, onChange }: { data: TeamData; onChange: (d: TeamData
   )
 }
 
+// ──────────────── CTA ────────────────
 function CTAEditor({ data, onChange }: { data: CTAData; onChange: (d: CTAData) => void }) {
   return (
     <div className="space-y-4">
       <Field label="Title" value={data.title} onChange={(v) => onChange({ ...data, title: v })} />
-      <Field label="Subtitle" value={data.subtitle} onChange={(v) => onChange({ ...data, subtitle: v })} textarea />
+      <Field label="Subtitle" value={data.subtitle} onChange={(v) => onChange({ ...data, subtitle: v })} />
       <Field label="Button Text" value={data.buttonText} onChange={(v) => onChange({ ...data, buttonText: v })} />
     </div>
   )
 }
 
+// ──────────────── Main component ────────────────
 export default function SectionEditorForm({ section, onChange, proposalId }: Props) {
   const [improving, setImproving] = useState(false)
   const [improveText, setImproveText] = useState('')
@@ -250,6 +354,7 @@ export default function SectionEditorForm({ section, onChange, proposalId }: Pro
     <div className="space-y-6">
       {renderEditor()}
 
+      {/* AI Improve */}
       <div className="border-t border-gray-100 pt-5">
         <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">✨ AI Improve</p>
         <div className="flex gap-2">
