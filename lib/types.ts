@@ -9,10 +9,16 @@ export type SectionType =
   | 'team'
   | 'cta'
 
+export type BackgroundType = 'gradient' | 'image' | 'video'
+
 export interface HeroData {
   title: string
   subtitle: string
   buttonText: string
+  backgroundType?: BackgroundType
+  backgroundImage?: string
+  backgroundVideo?: string
+  overlayOpacity?: number
 }
 
 export interface TextBlockData {
@@ -24,6 +30,7 @@ export interface FeatureItem {
   title: string
   description: string
   icon?: string
+  image?: string
 }
 
 export interface FeaturesData {
@@ -59,6 +66,7 @@ export interface TeamMember {
   name: string
   role: string
   bio: string
+  avatar?: string
 }
 
 export interface TeamData {
