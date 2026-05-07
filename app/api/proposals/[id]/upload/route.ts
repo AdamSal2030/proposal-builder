@@ -1,8 +1,6 @@
 import { NextRequest } from 'next/server'
-import { writeFile } from 'fs/promises'
-import { join } from 'path'
 import { prisma } from '@/lib/db'
-import { nanoid } from 'nanoid'
+import { saveFile, deleteStoredFile } from '@/lib/storage'
 
 type Context = { params: Promise<{ id: string }> }
 
@@ -18,7 +16,7 @@ async function extractText(buffer: Buffer, mimetype: string, filename: string): 
       const data = await (pdfParse.default ?? pdfParse)(buffer)
       return data.text
     } catch {
-      return `[PDF: ${filename} — install pdf-parse to extract text]`
+      return `[PDF: ${filename} — text extraction unavailable]`
     }
   }
 
@@ -31,11 +29,11 @@ async function extractText(buffer: Buffer, mimetype: string, filename: string): 
       const result = await mammoth.extractRawText({ buffer })
       return result.value
     } catch {
-      return `[Word doc: ${filename} — install mammoth to extract text]`
+      return `[Word doc: ${filename} — text extraction unavailable]`
     }
   }
 
-  return `[File: ${filename} — text extraction not supported for this format]`
+  return `[${filename} — text extraction not supported for this format]`
 }
 
 export async function POST(request: NextRequest, { params }: Context) {
@@ -48,28 +46,23 @@ export async function POST(request: NextRequest, { params }: Context) {
   const file = formData.get('file') as File | null
   if (!file) return Response.json({ error: 'No file provided' }, { status: 400 })
 
-  const maxSize = 10 * 1024 * 1024
-  if (file.size > maxSize) {
+  if (file.size > 10 * 1024 * 1024) {
     return Response.json({ error: 'File too large (max 10MB)' }, { status: 400 })
   }
 
   const bytes = await file.arrayBuffer()
   const buffer = Buffer.from(bytes)
 
-  const ext = file.name.split('.').pop() || 'bin'
-  const savedName = `${nanoid()}.${ext}`
-  const uploadDir = join(process.cwd(), 'public', 'uploads')
-  const filePath = join(uploadDir, savedName)
-
-  await writeFile(filePath, buffer)
-
-  const extractedText = await extractText(buffer, file.type, file.name)
+  const [filePath, extractedText] = await Promise.all([
+    saveFile(buffer, file.name),
+    extractText(buffer, file.type, file.name),
+  ])
 
   const upload = await prisma.upload.create({
     data: {
       proposalId: id,
       filename: file.name,
-      path: `/uploads/${savedName}`,
+      path: filePath,
       mimetype: file.type,
       size: file.size,
       extractedText,
@@ -85,6 +78,11 @@ export async function DELETE(request: NextRequest, { params }: Context) {
   const uploadId = searchParams.get('uploadId')
   if (!uploadId) return Response.json({ error: 'uploadId required' }, { status: 400 })
 
-  await prisma.upload.delete({ where: { id: uploadId, proposalId: id } })
+  const upload = await prisma.upload.findUnique({ where: { id: uploadId, proposalId: id } })
+  if (upload) {
+    await deleteStoredFile(upload.path)
+    await prisma.upload.delete({ where: { id: uploadId } })
+  }
+
   return Response.json({ success: true })
 }

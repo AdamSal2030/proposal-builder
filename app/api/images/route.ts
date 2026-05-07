@@ -1,7 +1,5 @@
 import { NextRequest } from 'next/server'
-import { writeFile } from 'fs/promises'
-import { join } from 'path'
-import { nanoid } from 'nanoid'
+import { saveImage } from '@/lib/storage'
 
 const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/svg+xml']
 const ALLOWED_VIDEO_TYPES = ['video/mp4', 'video/webm', 'video/ogg']
@@ -17,7 +15,10 @@ export async function POST(request: NextRequest) {
   const isVideo = ALLOWED_VIDEO_TYPES.includes(file.type)
 
   if (!isImage && !isVideo) {
-    return Response.json({ error: 'Unsupported file type. Use JPEG, PNG, GIF, WebP, SVG, MP4, or WebM.' }, { status: 400 })
+    return Response.json(
+      { error: 'Unsupported file type. Use JPEG, PNG, GIF, WebP, SVG, MP4, or WebM.' },
+      { status: 400 }
+    )
   }
 
   const maxSize = isVideo ? MAX_VIDEO_SIZE : MAX_IMAGE_SIZE
@@ -25,13 +26,9 @@ export async function POST(request: NextRequest) {
     return Response.json({ error: `File too large (max ${isVideo ? '100' : '10'}MB)` }, { status: 400 })
   }
 
-  const ext = file.name.split('.').pop() ?? (isVideo ? 'mp4' : 'jpg')
-  const filename = `${nanoid()}.${ext}`
-  const dir = join(process.cwd(), 'public', 'uploads', 'images')
-  const filePath = join(dir, filename)
-
   const bytes = await file.arrayBuffer()
-  await writeFile(filePath, Buffer.from(bytes))
+  const buffer = Buffer.from(bytes)
+  const url = await saveImage(buffer, file.name)
 
-  return Response.json({ url: `/uploads/images/${filename}`, type: isVideo ? 'video' : 'image' }, { status: 201 })
+  return Response.json({ url, type: isVideo ? 'video' : 'image' }, { status: 201 })
 }

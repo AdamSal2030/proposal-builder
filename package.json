@@ -23,6 +23,7 @@
     "@tiptap/pm": "^3.22.5",
     "@tiptap/react": "^3.22.5",
     "@tiptap/starter-kit": "^3.22.5",
+    "@vercel/blob": "^2.3.3",
     "dotenv": "^17.4.2",
     "lucide-react": "^1.14.0",
     "mammoth": "^1.12.0",
