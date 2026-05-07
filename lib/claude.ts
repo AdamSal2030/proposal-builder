@@ -12,29 +12,38 @@ export async function generateProposalSections(
   const message = await anthropic.messages.create({
     model: 'claude-sonnet-4-6',
     max_tokens: 4096,
-    system: `You are a professional proposal writer. Given information about a project, generate a structured proposal with compelling sections. Return ONLY valid JSON — no markdown, no explanation.`,
+    system: `You are a professional proposal writer. Generate structured proposal content. Return ONLY valid JSON — no markdown, no explanation, no code fences.`,
     messages: [
       {
         role: 'user',
         content: `Create a professional proposal for: "${proposalTitle}"
 
-Context/Content:
+Context:
 ${input}
 
-Return a JSON array of sections. Each section must have: id (unique string), type (one of: hero, summary, problem, solution, features, timeline, pricing, team, cta), and data (type-specific fields).
+Return a JSON array of proposal sections. Each section: { id (unique 8-char string), type, data }.
 
-Section data shapes:
+Available types and their data shapes:
+- cover: { title, subtitle, preparedFor, preparedBy, date }
 - hero: { title, subtitle, buttonText }
 - summary: { title, content }
-- problem: { title, content }
-- solution: { title, content }
-- features: { title, items: [{ title, description }] }
+- about: { title, content }
+- scope: { title, intro, items: [{ text, included: boolean }] }
+- specs: { title, subtitle, items: [{ label, value }] }
+- gallery: { title, subtitle, images: [] }
+- investment: { title, intro, items: [{ description, amount }], total, currency, validity, notes }
 - timeline: { title, items: [{ phase, duration, description }] }
-- pricing: { title, tiers: [{ name, price, period, features: string[], highlighted?: boolean }] }
-- team: { title, members: [{ name, role, bio }] }
+- testimonials: { title, items: [{ quote, author, role, company }] }
+- terms: { title, content, showSignature: true }
 - cta: { title, subtitle, buttonText }
 
-Generate 5-8 sections that make sense for this proposal. Always include hero and cta. Make the content professional, specific, and compelling.`,
+Rules:
+- Always start with cover or hero, always end with cta
+- Pick 5-7 sections that fit the proposal type (hotel, car, construction, service, etc.)
+- Make all content specific, professional and compelling — no generic filler
+- For investment: include realistic line items and a total
+- For scope: 4-6 included items, 1-2 excluded items
+- For specs: 6-10 relevant key/value rows`,
       },
     ],
   })

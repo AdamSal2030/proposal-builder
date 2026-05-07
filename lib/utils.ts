@@ -129,7 +129,7 @@ export function formatDate(date: Date | string): string {
   return new Date(date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
 }
 
-export const SECTION_LABELS: Record<SectionType, string> = {
+export const SECTION_LABELS: Record<string, string> = {
   hero: 'Hero Banner',
   cover: 'Cover Page',
   summary: 'Executive Summary',
