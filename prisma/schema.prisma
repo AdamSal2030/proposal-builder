@@ -22,6 +22,18 @@ model Proposal {
   uploads     Upload[]
 }
 
+model LibraryAsset {
+  id        String   @id @default(cuid())
+  filename  String
+  url       String
+  publicId  String
+  width     Int?
+  height    Int?
+  format    String?
+  size      Int
+  createdAt DateTime @default(now())
+}
+
 model Upload {
   id            String   @id @default(cuid())
   proposalId    String
