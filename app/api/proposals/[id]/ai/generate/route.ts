@@ -27,8 +27,8 @@ export async function POST(request: NextRequest, { params }: Context) {
 
   if (proposal.uploads.length > 0) {
     const uploadedContent = proposal.uploads
-      .filter((u) => u.extractedText)
-      .map((u) => `--- ${u.filename} ---\n${u.extractedText}`)
+      .filter((u: { extractedText: string | null; filename: string }) => u.extractedText)
+      .map((u: { extractedText: string | null; filename: string }) => `--- ${u.filename} ---\n${u.extractedText}`)
       .join('\n\n')
     if (uploadedContent) {
       inputText = inputText ? `${inputText}\n\n${uploadedContent}` : uploadedContent
