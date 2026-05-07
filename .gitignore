@@ -47,5 +47,7 @@ prisma/dev.db
 prisma/dev.db-journal
 
 # uploaded files
-/public/uploads/*
+/public/uploads/**
 !/public/uploads/.gitkeep
+!/public/uploads/images/
+!/public/uploads/images/.gitkeep
